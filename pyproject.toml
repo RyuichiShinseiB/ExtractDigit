@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "extract-digit"
+version = "0.1.0"
+description = ""
+authors = ["Ryuichi Shinsei <275051h@gs.kochi-tech.ac.jp>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jupyter = "^1.0.0"
+numpy = "^2.0.0"
+opencv-python = "^4.10.0.84"
+matplotlib = "^3.9.1"
+pillow = "^10.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
