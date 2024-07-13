@@ -1,7 +1,8 @@
 from typing import Sequence, TypeAlias
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
 
 SegmentOnOff: TypeAlias = Sequence[int]
 
@@ -60,7 +61,7 @@ SEGMENT_LOCATIONS = {
 
 def show_grid_img(digit_img: np.ndarray, num_col: int, num_row: int) -> None:
     height, width = digit_img.shape[:2]
-    img = digit_img[0: height - 1, 0: width - 1]
+    img = digit_img[0 : height - 1, 0 : width - 1]
     grid_splited_imgs = grid_split_array(img, num_col, num_row)
 
     fig = plt.figure(figsize=(3, 5))
