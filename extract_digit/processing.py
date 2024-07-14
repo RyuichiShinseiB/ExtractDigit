@@ -90,7 +90,7 @@ def crop_transform_show_digits(
 def binalize_image(
     img: cv2t.MatLike,
     gb_ksize: cv2t.Size = (15, 15),
-    gb_sigmaX: int = 2,
+    gb_sigmaX: float = 2,
     epf_sigma_s: float = 110,
     epf_sigma_r: float = 0.01,
     adaptive_thresh_blocksize: int = 301,
@@ -161,6 +161,10 @@ def _is_over_area(contour: cv2t.MatLike, area: float) -> bool:
     return judge
 
 
+def _calc_aspect(width: int, height: int) -> float:
+    return max(width, height) / min(width, height)
+
+
 def _is_inner_aspect(
     contour: cv2t.MatLike, min_aspect: float, max_aspect: float
 ) -> bool:
@@ -186,7 +190,7 @@ def _is_longer_than_width(contour: cv2t.MatLike) -> bool:
     return h > w
 
 
-def extract_digit_contours(
+def filtering_digit_contours(
     contours: Sequence[cv2t.MatLike],
     src_img: cv2t.MatLike,
     bb_filling_ratio: float = 0.3,
@@ -225,10 +229,6 @@ def sort_digit_contours(
     contours: Sequence[cv2t.MatLike],
 ) -> Sequence[cv2t.MatLike]:
     return sorted(contours, key=lambda x: np.squeeze(x)[:, 0].min())
-
-
-def _calc_aspect(width: int, height: int) -> float:
-    return max(width, height) / min(width, height)
 
 
 def remove_image_margins(img: cv2t.MatLike) -> cv2t.MatLike:
