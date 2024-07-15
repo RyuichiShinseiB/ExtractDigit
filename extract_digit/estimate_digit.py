@@ -133,7 +133,7 @@ def estimate_digit(
 def estimate_digits_from_image(
     digits_image: cv2t.MatLike,
     estimation_cfg: EstimationParams,
-    imshow: bool = False,
+    is_imshow: bool = False,
 ) -> list[str | None]:
     estimated_digits: list[str | None] = ["0"]
     aspect = _calc_aspect(digits_image.shape[:2])  # type: ignore
@@ -151,16 +151,17 @@ def estimate_digits_from_image(
         digits_image = digits_image[top:bottom, left:right]
 
     digit_imgs = np.array_split(digits_image, 3, axis=1)
-    if imshow:
+    if is_imshow:
         fig = plt.figure()
     for i, digit_img in enumerate(digit_imgs, 1):
-        if imshow:
+        if is_imshow:
             ax = fig.add_subplot(1, 3, i)
             ax.imshow(digit_img, "gray")
         estimated_digits.append(
             estimate_digit(digit_img, estimation_cfg.filling_area_ratio_thresh)
         )
-    fig.tight_layout()
+    if is_imshow:
+        fig.tight_layout()
     return estimated_digits
 
 
