@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, NamedTuple, Sequence
 
 import cv2.typing as cv2t
@@ -84,15 +85,11 @@ class RangeTuple(NamedTuple):
 
 class CropTransformParams(BaseModel):
     crop_area_vertices: QuadrilateralVertices
-    dstsize: tuple[int, int]
+    dst_size: tuple[int, int]
     imshow: bool = False
     roi: Sequence[int] | None = None
-    cua: BoundingBox = BoundingBox(
+    close_up_area: BoundingBox = BoundingBox(
         left=1900, right=2450, top=1600, bottom=1950
-    )
-    close_up_area: tuple[tuple[int, int], tuple[int, int]] = (
-        (1900, 2450),
-        (1600, 1950),
     )
 
 
@@ -110,3 +107,15 @@ class FilteringDigitParams(BaseModel):
     bb_filling_ratio: float
     bb_image_ratio: float
     inner_aspect_range: RangeTuple
+
+
+class Configurations(BaseModel):
+    crop_transform: CropTransformParams
+    binalize: BinalizeParams
+    filtering_digit: FilteringDigitParams
+
+    @staticmethod
+    def load_json(path: str | Path) -> "Configurations":
+        with open(path, "r") as f:
+            json_txt = f.read()
+        return Configurations.model_validate_json(json_txt)
