@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, NamedTuple, Sequence
+from typing import Literal, NamedTuple
 
 import cv2.typing as cv2t
 import numpy as np
@@ -87,7 +87,6 @@ class CropTransformParams(BaseModel):
     crop_area_vertices: QuadrilateralVertices
     dst_size: tuple[int, int]
     imshow: bool = False
-    roi: Sequence[int] | None = None
     close_up_area: BoundingBox = BoundingBox(
         left=1900, right=2450, top=1600, bottom=1950
     )
