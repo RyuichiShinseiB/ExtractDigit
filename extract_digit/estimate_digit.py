@@ -102,14 +102,15 @@ def grid_split_array(
     return col_row_arrays
 
 
-def estimate_digit(digit_img: np.ndarray) -> int | None:
+def estimate_digit(
+    digit_img: np.ndarray, filling_area_ratio_thresh: float
+) -> int | None:
     num_horizontal_split = 5
     num_vertical_split = 3
     grid_splited_imgs = grid_split_array(
         digit_img, num_horizontal_split, num_vertical_split
     )
     segment_states = SegmentStates()
-    area_threshold = 0.2
     for segment_idx, (i, j) in SEGMENT_LOCATIONS.items():
         _img = grid_splited_imgs[i][j]
         if _img.ndim != 2:
@@ -117,7 +118,7 @@ def estimate_digit(digit_img: np.ndarray) -> int | None:
         nonzero_area = np.count_nonzero(_img)
         img_area = _img.size
         filling_ratio = nonzero_area / img_area
-        if filling_ratio >= area_threshold:
+        if filling_ratio >= filling_area_ratio_thresh:
             segment_states.turn_on(segment_idx)
     return segment_states.cvt_digit()
 
