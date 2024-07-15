@@ -10,4 +10,9 @@ def test_load_json() -> None:
     with open(path, "r") as f:
         txt = f.read()
 
-    assert Configurations.model_validate_json(txt)
+    cfg = Configurations.model_validate_json(txt)
+    print(cfg)
+
+
+if __name__ == "__main__":
+    test_load_json()
