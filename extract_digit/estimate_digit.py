@@ -1,8 +1,12 @@
 from typing import Sequence, TypeAlias
 
 import cv2
+import cv2.typing as cv2t
 import matplotlib.pyplot as plt
 import numpy as np
+
+from .param_config import EstimationParams
+from .processing import _calc_aspect
 
 SegmentOnOff: TypeAlias = Sequence[int]
 
@@ -124,6 +128,40 @@ def estimate_digit(
         if filling_ratio >= filling_area_ratio_thresh:
             segment_states.turn_on(segment_idx)
     return segment_states.cvt_digit()
+
+
+def estimate_digits_from_image(
+    digits_image: cv2t.MatLike,
+    estimation_cfg: EstimationParams,
+    imshow: bool = False,
+) -> list[str | None]:
+    estimated_digits: list[str | None] = ["0"]
+    aspect = _calc_aspect(digits_image.shape[:2])  # type: ignore
+    # When the number of digits is 4-digit, the aspect ratio is larger than that of 3-digit.  # noqa: E501
+    if aspect > estimation_cfg.aspect_thresh:
+        # In case of 4-digits, The 4th digit is one.
+        estimated_digits[0] = "1"
+        height, width_old = digits_image.shape[:2]
+        width_new = int(height * estimation_cfg.three_digits_aspect)
+        left = width_old - width_new - 1
+        right = width_old - 1
+        top = 0
+        bottom = height - 1
+        # Retrieve only the last 3 digit image
+        digits_image = digits_image[top:bottom, left:right]
+
+    digit_imgs = np.array_split(digits_image, 3, axis=1)
+    if imshow:
+        fig = plt.figure()
+    for i, digit_img in enumerate(digit_imgs, 1):
+        if imshow:
+            ax = fig.add_subplot(1, 3, i)
+            ax.imshow(digit_img, "gray")
+        estimated_digits.append(
+            estimate_digit(digit_img, estimation_cfg.filling_area_ratio_thresh)
+        )
+    fig.tight_layout()
+    return estimated_digits
 
 
 def main() -> None:
