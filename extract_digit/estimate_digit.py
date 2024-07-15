@@ -24,7 +24,7 @@ class SegmentStates:
         self.states = [0] * 7
         return self
 
-    def cvt_digit(self) -> int | None:
+    def cvt_digit(self) -> str | None:
         try:
             digit = SEGMENT_DIGITS[tuple(self.states)]
         except KeyError as e:
@@ -34,17 +34,17 @@ class SegmentStates:
         return digit
 
 
-SEGMENT_DIGITS: dict[SegmentOnOff, int] = {
-    (1, 1, 1, 1, 1, 1, 0): 0,
-    (0, 1, 1, 0, 0, 0, 0): 1,
-    (1, 1, 0, 1, 1, 0, 1): 2,
-    (1, 1, 1, 1, 0, 0, 1): 3,
-    (0, 1, 1, 0, 0, 1, 1): 4,
-    (1, 0, 1, 1, 0, 1, 1): 5,
-    (1, 0, 1, 1, 1, 1, 1): 6,
-    (1, 1, 1, 0, 0, 1, 0): 7,
-    (1, 1, 1, 1, 1, 1, 1): 8,
-    (1, 1, 1, 1, 0, 1, 1): 9,
+SEGMENT_DIGITS: dict[SegmentOnOff, str] = {
+    (1, 1, 1, 1, 1, 1, 0): "0",
+    (0, 1, 1, 0, 0, 0, 0): "1",
+    (1, 1, 0, 1, 1, 0, 1): "2",
+    (1, 1, 1, 1, 0, 0, 1): "3",
+    (0, 1, 1, 0, 0, 1, 1): "4",
+    (1, 0, 1, 1, 0, 1, 1): "5",
+    (1, 0, 1, 1, 1, 1, 1): "6",
+    (1, 1, 1, 0, 0, 1, 0): "7",
+    (1, 1, 1, 1, 1, 1, 1): "8",
+    (1, 1, 1, 1, 0, 1, 1): "9",
 }
 
 
@@ -104,9 +104,9 @@ def grid_split_array(
 
 def estimate_digit(
     digit_img: np.ndarray, filling_area_ratio_thresh: float
-) -> int | None:
-    num_horizontal_split = 5
-    num_vertical_split = 3
+) -> str | None:
+    num_horizontal_split = 3
+    num_vertical_split = 5
     grid_splited_imgs = grid_split_array(
         digit_img, num_horizontal_split, num_vertical_split
     )
