@@ -28,13 +28,13 @@ class SegmentStates:
         self.states = [0] * 7
         return self
 
-    def cvt_digit(self) -> str | None:
+    def cvt_digit(self) -> str:
         try:
             digit = SEGMENT_DIGITS[tuple(self.states)]
         except KeyError as e:
             print(e)
-            print("Instead, returned None.")
-            digit = None
+            print("Instead, returned ''(empty).")
+            digit = ""
         return digit
 
 
