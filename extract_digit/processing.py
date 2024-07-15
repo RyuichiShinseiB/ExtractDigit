@@ -41,19 +41,18 @@ def crop_transform_show_digits(
     dst = cv2.warpPerspective(src, trans_mat, (width, height))
 
     if imshow:
-        fig, ax = plt.subplots(1, 2, figsize=(16, 6))
-        fig = plt.figure(figsize=(16, 6))
         if close_up_area is None:
             xmin, ymin = 0, 0
             ymax, xmax = src.shape
         else:
             xmin, xmax, ymin, ymax = close_up_area.unpack()
+
+        fig = plt.figure(figsize=(16, 6))
         ax = fig.add_subplot(1, 2, 1)
         ax.imshow(
-            # src[ymin : ymax + 1, xmin : xmax + 1],
             src,
             cmap=plt.get_cmap("Greys_r"),
-            extent=(xmin - 0.5, xmax + 0.5, ymax + 0.5, ymin - 0.5),
+            # extent=(xmin - 0.5, xmax + 0.5, ymax + 0.5, ymin - 0.5),
         )
         ax.add_patch(
             Polygon(
@@ -65,7 +64,7 @@ def crop_transform_show_digits(
         )
         if close_up_area is not None:
             ax.set_xlim(xmin, xmax)
-            ax.set_ylim(xmax, xmin)
+            ax.set_ylim(ymax, ymin)
             ax.set_xticks(
                 np.arange(xmin, xmax, 50),
                 minor=True,
@@ -74,7 +73,8 @@ def crop_transform_show_digits(
                 np.arange(ymin, ymax, 50),
                 minor=True,
             )
-        ax = fig.add_subplot(1, 2, 1)
+
+        ax = fig.add_subplot(1, 2, 2)
         ax.imshow(dst, cmap=plt.get_cmap("Greys_r"))
 
     return dst
