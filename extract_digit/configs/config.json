@@ -29,5 +29,10 @@
         "bb_filling_ratio": 0.3,
         "bb_image_ratio": 3e-3,
         "inner_aspect_range": [1.6, 6.0]
+    },
+    "estimation": {
+        "aspect_thresh": 1.6,
+        "three_digits_aspect": 1.5,
+        "filling_area_ratio_thresh": 0.2
     }
 }
