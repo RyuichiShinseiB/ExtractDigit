@@ -118,6 +118,7 @@ class Configurations(BaseModel):
     crop_transform: CropTransformParams
     binalize: BinalizeParams
     filtering_digit: FilteringDigitParams
+    estimation: EstimationParams
 
     @staticmethod
     def load_json(path: str | Path) -> "Configurations":
