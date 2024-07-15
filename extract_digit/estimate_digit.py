@@ -111,7 +111,7 @@ def grid_split_array(
 
 def estimate_digit(
     digit_img: np.ndarray, filling_area_ratio_thresh: float
-) -> str | None:
+) -> str:
     num_horizontal_split = 3
     num_vertical_split = 5
     grid_splited_imgs = grid_split_array(
@@ -134,8 +134,8 @@ def estimate_digits_from_image(
     digits_image: cv2t.MatLike,
     estimation_cfg: EstimationParams,
     is_imshow: bool = False,
-) -> list[str | None]:
-    estimated_digits: list[str | None] = ["0"]
+) -> list[str]:
+    estimated_digits: list[str] = ["0"]
     aspect = _calc_aspect(digits_image.shape[:2])  # type: ignore
     # When the number of digits is 4-digit, the aspect ratio is larger than that of 3-digit.  # noqa: E501
     if aspect > estimation_cfg.aspect_thresh:
