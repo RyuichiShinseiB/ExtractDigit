@@ -108,6 +108,12 @@ class FilteringDigitParams(BaseModel):
     inner_aspect_range: RangeTuple
 
 
+class EstimationParams(BaseModel):
+    aspect_thresh: float
+    three_digits_aspect: float
+    filling_area_ratio_thresh: float
+
+
 class Configurations(BaseModel):
     crop_transform: CropTransformParams
     binalize: BinalizeParams
