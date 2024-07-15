@@ -227,6 +227,15 @@ def remove_image_margins(img: cv2t.MatLike) -> cv2t.MatLike:
     return img.copy()[bb.top : bb.bottom, bb.left : bb.right]
 
 
+def fill_contours(
+    base_img: cv2t.MatLike, contours: Sequence[cv2t.MatLike]
+) -> cv2t.MatLike:
+    drawing = np.zeros_like(base_img, np.uint8)
+    contour_area_img = cv2.fillPoly(drawing, contours, (255,))
+    # _, masked = cv2.threshold(base_img * mask, 1, 255, cv2.THRESH_BINARY)
+    return contour_area_img
+
+
 def pad_image(
     img: cv2t.MatLike, pad_size: Sequence[int] | None = None
 ) -> cv2t.MatLike:
