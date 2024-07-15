@@ -17,8 +17,7 @@ def crop_transform_show_digits(
     dst_size: tuple[int, int],
     *,
     imshow: bool = False,
-    roi: BoundingBox | None = None,
-    close_up_area: tuple[tuple[int, int], tuple[int, int]] | None = None,
+    close_up_area: BoundingBox | None = None,
 ) -> cv2t.MatLike:
     """Crops and rectifies a target area of an image to a rectangle
 
@@ -27,8 +26,7 @@ def crop_transform_show_digits(
         crop_area_vertices (tuple[tuple[int, int], ...]): Each vertex of the area to be cropped. The order is clockwise.
         dst_size (tuple[int, int]): Image size after rectangle correction.
         imshow (bool, optional): Whether to compare images before and after conversion.  Defaults to False.
-        roi (tuple[int, int, int, int] | None, optional): _description_. Defaults to None.
-        close_up_area (tuple[tuple[int, int], tuple[int, int]] | None, optional): _description_. Defaults to None.
+        close_up_area (BoundingBox | None, optional): _description_. Defaults to None.
 
     Returns:
         cv2t.MatLike: Cropped and corrected image.
@@ -45,11 +43,11 @@ def crop_transform_show_digits(
     if imshow:
         fig, ax = plt.subplots(1, 2, figsize=(16, 6))
         fig = plt.figure(figsize=(16, 6))
-        if roi is None:
+        if close_up_area is None:
             xmin, ymin = 0, 0
             ymax, xmax = src.shape
         else:
-            xmin, xmax, ymin, ymax = roi.unpack()
+            xmin, xmax, ymin, ymax = close_up_area.unpack()
         ax = fig.add_subplot(1, 2, 1)
         ax.imshow(
             # src[ymin : ymax + 1, xmin : xmax + 1],
@@ -66,14 +64,14 @@ def crop_transform_show_digits(
             )
         )
         if close_up_area is not None:
-            ax.set_xlim(close_up_area[0])
-            ax.set_ylim(close_up_area[1][::-1])
+            ax.set_xlim(xmin, xmax)
+            ax.set_ylim(xmax, xmin)
             ax.set_xticks(
-                np.arange(close_up_area[0][0], close_up_area[0][1], 50),
+                np.arange(xmin, xmax, 50),
                 minor=True,
             )
             ax.set_yticks(
-                np.arange(close_up_area[1][0], close_up_area[1][1], 50),
+                np.arange(ymin, ymax, 50),
                 minor=True,
             )
         ax = fig.add_subplot(1, 2, 1)
