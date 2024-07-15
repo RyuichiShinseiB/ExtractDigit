@@ -1,0 +1,33 @@
+{
+    "crop_transform": {
+        "crop_area_vertices": {
+            "upper_left": {"x": 1980, "y": 1620},
+            "upper_right": {"x": 2400, "y": 1670},
+            "lower_right": {"x": 2370, "y": 1910},
+            "lower_left": {"x": 1950, "y": 1850}
+        },
+        "dst_size": [200, 300],
+        "imshow": true,
+        "roi": null,
+        "close_up_area": {
+            "left": 1900,
+            "right": 2450,
+            "top": 1600,
+            "bottom": 1950
+        }
+    },
+    "binalize": {
+        "gb_ksize": [15, 15],
+        "gb_sigmaX": 2,
+        "epf_sigma_s": 110.0,
+        "epf_sigma_r": 0.01,
+        "adaptive_thresh_blocksize": 301,
+        "adaptive_thresh_C": 1,
+        "closing_ksize": [3, 3]
+    },
+    "filtering_digit": {
+        "bb_filling_ratio": 0.3,
+        "bb_image_ratio": 3e-3,
+        "inner_aspect_range": [1.6, 6.0]
+    }
+}
