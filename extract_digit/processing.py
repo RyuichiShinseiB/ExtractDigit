@@ -204,7 +204,7 @@ def filtering_digit_contours(
 
 def draw_contours(
     src_img: cv2t.MatLike, contours: Sequence[cv2t.MatLike]
-) -> Figure:
+) -> tuple[cv2t.MatLike, Figure]:
     fig = plt.figure()
     ax = fig.add_subplot()
     drawing_canvas = cv2.cvtColor(src_img, cv2.COLOR_GRAY2RGB)
@@ -213,7 +213,7 @@ def draw_contours(
             drawing_canvas, contours, i, (255, 0, 0)
         )
     ax.imshow(drawing_canvas)
-    return fig
+    return drawing_canvas, fig
 
 
 def sort_digit_contours(
