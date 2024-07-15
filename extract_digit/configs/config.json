@@ -7,7 +7,7 @@
             "lower_left": {"x": 1950, "y": 1850}
         },
         "dst_size": [200, 300],
-        "imshow": true,
+        "imshow": false,
         "roi": null,
         "close_up_area": {
             "left": 1900,
