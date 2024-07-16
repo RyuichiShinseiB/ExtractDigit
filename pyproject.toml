@@ -13,6 +13,7 @@ opencv-python = "^4.10.0.84"
 matplotlib = "^3.9.1"
 pillow = "^10.4.0"
 pydantic = "^2.8.2"
+polars = "^1.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
