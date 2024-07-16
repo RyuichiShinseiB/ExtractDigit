@@ -98,12 +98,10 @@ if __name__ == "__main__":
         if all_or_one == "0":
             src_path = select_img_with_window()
             run_one_file(src_path, is_imshow=True)
-            break
         elif all_or_one == "1":
             src_dir = select_directory_with_window()
             dst_dir = select_directory_with_window()
             run_on_directory(src_dir, dst_dir)
-            break
         elif all_or_one == "-1":
             print("Exit")
             break
