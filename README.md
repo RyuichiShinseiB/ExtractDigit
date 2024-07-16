@@ -11,13 +11,13 @@ git clone https://github.com/RyuichiShinseiB/ExtractDigit.git
 
 ### Requirements package installing
 - pip を使っている方はこちらを
-```sh
-pip install -r requirements.txt
-```
+    ```sh
+    pip install -r requirements.txt
+    ```
 - poetry を使っている方はこちらを
-```sh
-poetry install
-```
+    ```sh
+    poetry install
+    ```
 
 ## Usage
 ### 解析前
