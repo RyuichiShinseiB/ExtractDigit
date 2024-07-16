@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import cv2
+import matplotlib.pyplot as plt
 
 from extract_digit.estimate_digit import estimate_digits_from_image
 from extract_digit.param_config import Configurations
@@ -11,6 +12,7 @@ from extract_digit.processing import (
     fill_contours,
     filtering_digit_contours,
     find_contours,
+    pad_image,
     remove_image_margins,
 )
 from extract_digit.utils import (
@@ -19,7 +21,7 @@ from extract_digit.utils import (
 )
 
 
-def run_one_file(img_path: str | Path) -> list[str]:
+def run_one_file(img_path: str | Path, is_imshow: bool = False) -> list[str]:
     config_path = "extract_digit/configs/config.json"
     cfg = Configurations.load_json(config_path)
     img = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
@@ -54,15 +56,24 @@ def run_one_file(img_path: str | Path) -> list[str]:
     digits_area = fill_contours(cropped_img, contours)
 
     removed_margins = remove_image_margins(digits_area)
-    digits = estimate_digits_from_image(removed_margins, cfg.estimation)
+    added_pad_img = pad_image(removed_margins)
+    digits = estimate_digits_from_image(
+        added_pad_img, cfg.estimation, is_imshow
+    )
     print(digits)
+
+    if is_imshow:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        ax.imshow(removed_margins)
+        plt.show()
 
     return digits
 
 
 def run_on_directory(src_dir: str | Path, dst_dir: str | Path) -> None:
     src_dir = Path(src_dir)
-    # img_paths = sorted(src_dir.glob(r"*.jpg"))
+    # Select image file paths and sort
     img_paths = sorted(
         [
             p
@@ -70,14 +81,13 @@ def run_on_directory(src_dir: str | Path, dst_dir: str | Path) -> None:
             if re.search(r"^.*\.(jpg|png|JPEG)$", p.name)
         ]
     )
-    # img_paths = sorted(src_dir.glob(r"*.(jpg|png|JPG|JPEG)"))
-    print(img_paths)
-    extracted_luxes = [[p.stem] + run_one_file(p) for p in img_paths]
+    # Extract digits from each image
+    digits_eash_image = [[p.stem] + run_one_file(p) for p in img_paths]
 
     dst_dir = Path(dst_dir)
     with open(dst_dir / "measured_lux_progress.csv", "x") as f:
         f.write("img_name,4th-digit,3rd-digit,2nd-digit,1st-digit\n")
-        f.writelines([",".join(luxes) + "\n" for luxes in extracted_luxes])
+        f.writelines([",".join(digits) + "\n" for digits in digits_eash_image])
 
 
 if __name__ == "__main__":
@@ -87,7 +97,7 @@ if __name__ == "__main__":
         )
         if all_or_one == "0":
             src_path = select_img_with_window()
-            run_one_file(src_path)
+            run_one_file(src_path, is_imshow=True)
             break
         elif all_or_one == "1":
             src_dir = select_directory_with_window()
