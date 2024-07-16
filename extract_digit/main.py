@@ -85,7 +85,7 @@ def run_on_directory(src_dir: str | Path, dst_dir: str | Path) -> None:
     digits_eash_image = [[p.stem] + run_one_file(p) for p in img_paths]
 
     dst_dir = Path(dst_dir)
-    with open(dst_dir / "measured_lux_progress.csv", "x") as f:
+    with open(dst_dir / "recognized_digits.csv", "x") as f:
         f.write("img_name,4th-digit,3rd-digit,2nd-digit,1st-digit\n")
         f.writelines([",".join(digits) + "\n" for digits in digits_eash_image])
 
