@@ -21,7 +21,7 @@ git clone https://github.com/RyuichiShinseiB/ExtractDigit.git
 
 ## Usage
 ### 解析前
-1. ペイントソフトなどでディスプレイ部分を示す四角形の領域のピクセルの位置をメモしておく。
+1. ペイントソフトなどでディスプレイ部分を示す四角形の領域の各頂点の位置をメモしておく。
 2. ./extract_digit/configs/config.json の以下の`<replace>`部分をメモしていたピクセルの位置に修正する。
 ```json: config.json
 {
