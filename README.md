@@ -1,4 +1,7 @@
 # Extract digit from 7 segments display
+7セグメントディスプレイから数値を読み取るプログラムです。  \
+Note:  \
+以下のUsageに書いてあるものは照度計LX1330Bに最適化されたプログラムなので、7セグメントディスプレイに対して行いたい場合はextract_digitのprocessingモジュールとestimateモジュールを活用してプログラムを作成してください。
 ## Preparation
 ### Download
 このリポジトリをクローンしてください。
