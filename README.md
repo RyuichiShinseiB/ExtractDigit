@@ -5,7 +5,7 @@
 ```bash
 git clone https://github.com/RyuichiShinseiB/ExtractDigit.git
 ```
-あるいは、ダウンロードしてください
+あるいは、zipファイルをダウンロード・解凍してください
 ![How_to_download_repository](./refs/images/How_to_download_repository_zip.png)
 
 
