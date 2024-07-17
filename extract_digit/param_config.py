@@ -1,9 +1,11 @@
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import Generic, Literal, NamedTuple, TypeVar
 
 import cv2.typing as cv2t
 import numpy as np
 from pydantic import BaseModel, Field
+
+numT = TypeVar("numT", int, float)
 
 
 class BoundingBox(BaseModel):
@@ -28,27 +30,27 @@ class BoundingBox(BaseModel):
         return self.left, self.right, self.top, self.bottom
 
 
-class Point(NamedTuple):
-    x: int
-    y: int
+class Point(NamedTuple, Generic[numT]):
+    x: numT
+    y: numT
 
-    def to_tuple(self, order: Literal["xy", "yx"] = "xy") -> tuple[int, int]:
-        """Converts to tuple
+    # def to_tuple(self, order: Literal["xy", "yx"] = "xy") -> tuple[numT, numT]:
+    #     """Converts to tuple
 
-        Args:
-            order (Literal["xy", "yx"], optional): the order of x and y. Defaults to "xy".
+    #     Args:
+    #         order (Literal["xy", "yx"], optional): the order of x and y. Defaults to "xy".
 
-        Raises:
-            KeyError: If an order other than xy or yx is entered, this error is raised.
+    #     Raises:
+    #         KeyError: If an order other than xy or yx is entered, this error is raised.
 
-        Returns:
-            tuple[int, int]: order=="xy" -> (x, y). order=="yx" -> (y, x)
-        """  # noqa: E501
-        if order == "xy":
-            return (self.x, self.y)
-        elif order == "yx":
-            return (self.y, self.x)
-        raise KeyError("`Order` is 'xy' or 'yx'")
+    #     Returns:
+    #         tuple[int, int]: order=="xy" -> (x, y). order=="yx" -> (y, x)
+    #     """  # noqa: E501
+    #     if order == "xy":
+    #         return (self.x, self.y)
+    #     elif order == "yx":
+    #         return (self.y, self.x)
+    #     raise KeyError("`Order` is 'xy' or 'yx'")
 
 
 class QuadrilateralVertices(BaseModel):
@@ -68,10 +70,14 @@ class QuadrilateralVertices(BaseModel):
             tuple[tuple[int, int] x 4]: Vertex is (x, y). (upper left, upper right, lower right, lower left)
         """  # noqa: E501
         return (
-            self.upper_left.to_tuple(),
-            self.upper_right.to_tuple(),
-            self.lower_right.to_tuple(),
-            self.lower_left.to_tuple(),
+            self.upper_left,
+            self.upper_right,
+            self.lower_right,
+            self.lower_left,
+            # self.upper_left.to_tuple(),
+            # self.upper_right.to_tuple(),
+            # self.lower_right.to_tuple(),
+            # self.lower_left.to_tuple(),
         )
 
 
