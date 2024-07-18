@@ -1,9 +1,13 @@
 import queue
 import tkinter as tk
 from tkinter import filedialog
-from typing import Generic, Sequence, overload
+from typing import Generic, Sequence, cast, overload
 
 import matplotlib.pyplot as plt
+import numpy as np
+import numpy.typing as npt
+from matplotlib.backend_bases import MouseEvent, PickEvent
+from matplotlib.lines import Line2D
 
 # from .param_config import Point
 from extract_digit.param_config import Point, numT
@@ -95,8 +99,6 @@ class Quadraliteral(Generic[numT]):
 
 
 def gui_test() -> None:
-    from matplotlib.backend_bases import MouseEvent
-
     def motion(event: MouseEvent) -> None:
         x = event.xdata
         y = event.ydata
@@ -117,6 +119,83 @@ def gui_test() -> None:
     plt.show()
 
 
+class InteractivePolygons:
+    def __init__(
+        self, x: npt.ArrayLike, y: npt.ArrayLike, max_length: int = 0
+    ) -> None:
+        self.xdata = x
+        self.ydata = y
+        self.max_length = len(self.xdata) if max_length is None else max_length  # type: ignore
+        self._picked_ind = -1
+        self.gco: Line2D | None = None
+
+    @property
+    def xdata_(self) -> npt.ArrayLike:
+        return np.concat([self.xdata, [self.xdata[0]]])  # type: ignore
+
+    @property
+    def ydata_(self) -> npt.ArrayLike:
+        return np.concat([self.ydata, [self.ydata[0]]])  # type: ignore
+
+    @property
+    def picked_ind(self) -> int:
+        return self._picked_ind
+
+    @picked_ind.setter
+    def picked_ind(self, ind: int) -> None:
+        self._picked_ind = ind
+
+    def update_location(
+        self, x: float, y: float, ind: int | None = None
+    ) -> None:
+        if ind is None:
+            ind = self.picked_ind
+        if ind > self.max_length - 1:
+            ind = 0
+        print("updating index: ", ind)
+        self.xdata[ind] = x  # type: ignore
+        self.ydata[ind] = y  # type: ignore
+
+    def xy_points(self) -> tuple[tuple[float, float], ...]:
+        return tuple(zip(self.xdata, self.ydata))  # type: ignore
+
+
+def move_dots() -> None:
+    def motion(event: MouseEvent) -> None:
+        if xydata.gco is None:
+            return
+        x = event.xdata
+        y = event.ydata
+        if x is None or y is None:
+            return
+        xydata.update_location(x, y)
+        xydata.gco.set_data(
+            xydata.xdata_,
+            xydata.ydata_,
+        )
+        plt.draw()
+
+    def onpick(event: PickEvent) -> None:
+        xydata.gco = cast(Line2D, event.artist)
+        xydata.xdata = xydata.gco.get_xdata()[: xydata.max_length]  # type:ignore
+        xydata.ydata = xydata.gco.get_ydata()[: xydata.max_length]  # type:ignore
+        xydata.picked_ind = event.ind[0]  # type: ignore
+
+    def release(_: MouseEvent) -> None:
+        xydata.gco = None
+
+    xydata = InteractivePolygons(
+        np.random.rand(4), np.random.rand(4), max_length=4
+    )
+    fig, ax = plt.subplots()
+    ax.plot(xydata.xdata_, xydata.ydata_, "o-", picker=15)
+
+    fig.canvas.mpl_connect("pick_event", onpick)  # type: ignore
+    fig.canvas.mpl_connect("motion_notify_event", motion)  # type: ignore
+    fig.canvas.mpl_connect("button_release_event", release)  # type: ignore
+    plt.show()
+
+
 if __name__ == "__main__":
     # lifo: queue.Queue[int] = queue.Queue(4)
     # lifo.put(4)
@@ -127,4 +206,8 @@ if __name__ == "__main__":
     # print(lifo.get())
     # lifo.put(3)
     # print(lifo.get())
-    gui_test()
+    # gui_test()
+    move_dots()
+    # data = InteractivePolygons(np.random.rand(4), np.random.rand(4))
+    # print(data._xdata_for_add)
+    # print(data._ydata_for_add)
