@@ -1,5 +1,6 @@
 from typing import Sequence
 
+import cv2
 import matplotlib.pyplot as plt
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.lines import Line2D
@@ -8,11 +9,26 @@ from matplotlib.lines import Line2D
 class InteractivePlot:
     def __init__(
         self,
-        points_x: Sequence[float] = (-1, 1, 1, -1),
-        points_y: Sequence[float] = (1, 1, -1, -1),
+        points_x: Sequence[float] | None = None,
+        points_y: Sequence[float] | None = None,
     ) -> None:
+        self.image = cv2.imread(
+            "data/src_images/IMG_20240708_132157_011.jpg", cv2.IMREAD_GRAYSCALE
+        )
+        h, w = self.image.shape[:2]
+        offset_h, offset_w = h // 3, w // 3
+
         self.fig, self.ax = plt.subplots()
-        self.points: list[tuple[float, float]] = list(zip(points_x, points_y))
+        self.points: list[tuple[float, float]] = (
+            list(zip(points_x, points_y))
+            if points_x is not None and points_y is not None
+            else [
+                (offset_w, offset_h),
+                (offset_w * 2, offset_h),
+                (offset_w * 2, offset_h * 2),
+                (offset_w, offset_h * 2),
+            ]
+        )
         self.line: Line2D | None = None
         self.selected_point: tuple[float, float] | None = None
         self.selected_point_index: int | None = None
@@ -25,9 +41,12 @@ class InteractivePlot:
         self.fig.canvas.mpl_connect("motion_notify_event", self.on_motion)  # type: ignore
 
     def init_plot(self) -> None:
+        self.ax.imshow(self.image)
         x, y = zip(*self.points)
-        (self.line,) = self.ax.plot(x, y, marker="o", linestyle="-")
+        (self.line,) = self.ax.plot(x, y, marker="o", linestyle="-", picker=20)
         self.ax.plot([x[0], x[-1]], [y[0], y[-1]], "r--")
+        for line in self.ax.lines:
+            line.set_pickradius(20)
 
     def update_plot(self) -> None:
         if self.line is None:
@@ -72,24 +91,24 @@ class InteractivePlot:
     def on_motion(self, event: MouseEvent) -> None:
         # print("in on_motion: ", type(event))
         # print(f"{self.is_moving_all_points=}")
-        print(
-            f"""
-            {self.selected_point = }
-            {event.xdata = }
-            {event.ydata = }
-            {self.start_drag_x = }
-            {self.start_drag_y = }
-            """
-        )
+        # print(
+        #     f"""
+        #     {self.selected_point = }
+        #     {event.xdata = }
+        #     {event.ydata = }
+        #     {self.start_drag_x = }
+        #     {self.start_drag_y = }
+        #     """
+        # )
         if event.inaxes != self.ax:
+            return
+        if event.xdata is None or event.ydata is None:
             return
 
         if (
             self.is_moving_all_points
             and self.start_drag_x is not None
             and self.start_drag_y is not None
-            and event.xdata is not None
-            and event.ydata is not None
         ):
             print("in points moving scope")
             dx = event.xdata - self.start_drag_x
