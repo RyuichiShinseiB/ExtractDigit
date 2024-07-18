@@ -1,7 +1,7 @@
 import queue
 import tkinter as tk
 from tkinter import filedialog
-from typing import Sequence, overload
+from typing import Generic, Sequence, overload
 
 import matplotlib.pyplot as plt
 
@@ -42,18 +42,22 @@ def select_directory_with_window() -> str:
     return path
 
 
-class Quadraliteral:
+class Quadraliteral(Generic[numT]):
     @overload
-    def __init__(self, vertices: Sequence[Point] | None = None) -> None: ...
+    def __init__(
+        self, vertices: Sequence[Point[numT]] | None = None
+    ) -> None: ...
     @overload
     def __init__(
         self, vertices: Sequence[tuple[numT, numT]] | None = None
     ) -> None: ...
     def __init__(
         self,
-        vertices: Sequence[tuple[numT, numT]] | Sequence[Point] | None = None,
+        vertices: Sequence[tuple[numT, numT]]
+        | Sequence[Point[numT]]
+        | None = None,
     ) -> None:
-        self.points: queue.Queue[Point] = queue.Queue(4)
+        self.points: queue.Queue[Point[numT]] = queue.Queue(4)
         self._x_points: queue.Queue[numT] = queue.Queue(4)
         self._y_points: queue.Queue[numT] = queue.Queue(4)
         if vertices is not None:
@@ -98,14 +102,15 @@ def gui_test() -> None:
         y = event.ydata
         # print(x, y)
 
-        if x is not None and y is not None:
-            ql.set_point((x, y))
-            print(ql.x_points, ql.y_points)
-            ln.set_data(ql.x_points, ql.y_points)
+        if x is None or y is None:
+            return
+        ql.set_point((x, y))
+        print(ql.x_points, ql.y_points)
+        ln.set_data(ql.x_points, ql.y_points)
         plt.draw()
 
     fig = plt.figure()
-    ql = Quadraliteral()
+    ql: Quadraliteral[float] = Quadraliteral()
     (ln,) = plt.plot([], [], "x")
 
     fig.canvas.mpl_connect("button_release_event", motion)  # type: ignore
