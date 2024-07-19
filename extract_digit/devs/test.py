@@ -3,10 +3,13 @@ from typing import Sequence
 
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.widgets as wg
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.lines import Line2D
+
+from extract_digit.processing import crop_transform_show_digits
 
 
 class InteractivePlot:
@@ -23,7 +26,9 @@ class InteractivePlot:
         h, w = self.image.shape[:2]
         offset_h, offset_w = h // 3, w // 3
 
-        self.fig, self.ax = plt.subplots()
+        self.fig = plt.figure(figsize=(14, 7))
+        # left side view (original image)
+        self.ax_main = self.fig.add_subplot(1, 2, 1)
         self.points: list[tuple[float, float]] = (
             list(zip(points_x, points_y))
             if points_x is not None and points_y is not None
@@ -40,35 +45,56 @@ class InteractivePlot:
         self.start_drag_x: float | None = None
         self.start_drag_y: float | None = None
         self.hit_test_radius = (w + h) / 2 / 100
+
+        # right side view (processed image)
+        self.ax_prcd = self.fig.add_subplot(1, 2, 2)
+        self.processed_img: cv2.typing.MatLike = np.full(
+            (200, 300), 255, np.uint8
+        )
+
+        # button
+        self.ax_run = self.fig.add_axes((0.7, 0.05, 0.1, 0.075))
+        self.btn_run = wg.Button(
+            self.ax_run,
+            "crop and rectify",
+            color="#7a776c",
+            hovercolor="#38b48b",
+        )
+
         self.init_plot()
+
         self.fig.canvas.mpl_connect("button_press_event", self.on_click)  # type: ignore
         self.fig.canvas.mpl_connect("button_release_event", self.on_release)  # type: ignore
         self.fig.canvas.mpl_connect("motion_notify_event", self.on_motion)  # type: ignore
-        self.ax.callbacks.connect("xlim_changed", self.on_axes_change)
-        self.ax.callbacks.connect("ylim_changed", self.on_axes_change)
+        self.ax_main.callbacks.connect("xlim_changed", self.on_axes_change)
+        self.ax_main.callbacks.connect("ylim_changed", self.on_axes_change)
+
+        self.btn_run.on_clicked(self.on_btn_clicked)  # type: ignore
 
     def init_plot(self) -> None:
-        self.ax.imshow(self.image)
+        self.ax_main.imshow(self.image, "gray")
         x, y = zip(*self.points)
-        (self.line,) = self.ax.plot(
+        (self.line,) = self.ax_main.plot(
             x,
             y,
             "r--",
             marker="o",
         )
-        self.ax.plot([x[0], x[-1]], [y[0], y[-1]], "r--")
+        self.ax_main.plot([x[0], x[-1]], [y[0], y[-1]], "r--")
+
+        self.ax_prcd.imshow(np.zeros((200, 300), np.uint8), "gray")
 
     def update_plot(self) -> None:
         if self.line is None:
             return
         x, y = zip(*self.points)
         self.line.set_data(x, y)
-        self.ax.lines[-1].set_data([x[0], x[-1]], [y[0], y[-1]])
+        self.ax_main.lines[-1].set_data([x[0], x[-1]], [y[0], y[-1]])
         self.fig.canvas.draw()
 
     def on_click(self, event: MouseEvent) -> None:
         # print("in on_click: ", type(event))
-        if event.inaxes != self.ax:
+        if event.inaxes != self.ax_main:
             return
 
         if event.xdata is None or event.ydata is None:
@@ -80,7 +106,7 @@ class InteractivePlot:
                     return
                 self.is_moving_all_points = (
                     self.line.contains(event)[0]
-                    or self.ax.lines[-1].contains(event)[0]
+                    or self.ax_main.lines[-1].contains(event)[0]
                 )
                 self.start_drag_x = event.xdata
                 self.start_drag_y = event.ydata
@@ -101,7 +127,7 @@ class InteractivePlot:
         self.start_drag_y = None
 
     def on_motion(self, event: MouseEvent) -> None:
-        if event.inaxes != self.ax:
+        if event.inaxes != self.ax_main:
             return
         if event.xdata is None or event.ydata is None:
             return
@@ -131,6 +157,16 @@ class InteractivePlot:
         height = ylim[0] - ylim[1]
         self.hit_test_radius = (width + height) / 2 / 100
         # print(f"Zoomed xlim: {xlim}, ylim{ylim}")
+
+    def on_btn_clicked(self, _: MouseEvent) -> None:
+        # print(type(_))
+        self.processed_img = crop_transform_show_digits(
+            self.image,
+            [(int(point[0]), int(point[1])) for point in self.points],
+            (200, 300),
+        )
+        self.ax_prcd.imshow(self.processed_img, "gray")
+        self.fig.canvas.draw()
 
     def _check_inner_radius(
         self, p_a: tuple[float, float], p_b: tuple[float, float]
