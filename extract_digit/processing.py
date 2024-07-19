@@ -13,7 +13,7 @@ from .param_config import BoundingBox, QuadrilateralVertices, RangeTuple
 def crop_transform_show_digits(
     src: cv2t.MatLike,
     # crop_area_vertices: tuple[tuple[int, int], ...],
-    crop_area_vertices: QuadrilateralVertices,
+    crop_area_vertices: QuadrilateralVertices | tuple[tuple[int, int], ...],
     dst_size: tuple[int, int],
     *,
     imshow: bool = False,
@@ -31,7 +31,9 @@ def crop_transform_show_digits(
     Returns:
         cv2t.MatLike: Cropped and corrected image.
     """  # noqa: E501
-    src_pts1 = np.array(crop_area_vertices.align_vertices(), np.float32)
+    if isinstance(crop_area_vertices, QuadrilateralVertices):
+        crop_area_vertices = crop_area_vertices.align_vertices()
+    src_pts1 = np.array(crop_area_vertices, np.float32)
     height, width = dst_size
     dst_pts2 = np.array(
         [[0, 0], [width, 0], [width, height], [0, height]], np.float32
@@ -56,7 +58,7 @@ def crop_transform_show_digits(
         )
         ax.add_patch(
             Polygon(
-                crop_area_vertices.align_vertices(),
+                crop_area_vertices,
                 fc="None",
                 ec="red",
                 alpha=0.5,
