@@ -1,4 +1,5 @@
-from typing import Sequence, overload
+from collections.abc import Sequence
+from typing import overload
 
 import cv2
 import cv2.typing as cv2t
@@ -13,7 +14,7 @@ from .param_config import BoundingBox, QuadrilateralVertices, RangeTuple
 def crop_transform_show_digits(
     src: cv2t.MatLike,
     # crop_area_vertices: tuple[tuple[int, int], ...],
-    crop_area_vertices: QuadrilateralVertices | tuple[tuple[int, int], ...],
+    crop_area_vertices: QuadrilateralVertices | Sequence[tuple[int, int]],
     dst_size: tuple[int, int],
     *,
     imshow: bool = False,
