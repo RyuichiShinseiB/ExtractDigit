@@ -74,21 +74,24 @@ class InteractivePlot:
         if event.xdata is None or event.ydata is None:
             return
         if event.button == 1:  # Left mouse button
-            for i, point in enumerate(self.points):
-                if self._check_inner_radius(point, (event.xdata, event.ydata)):
-                    self.selected_point_index = i
+            if event.dblclick:
+                # Check if clicking on the line
+                if self.line is None:
                     return
+                self.is_moving_all_points = (
+                    self.line.contains(event)[0]
+                    or self.ax.lines[-1].contains(event)[0]
+                )
+                self.start_drag_x = event.xdata
+                self.start_drag_y = event.ydata
 
-        elif event.dblclick == 1:
-            # Check if clicking on the line
-            if self.line is None:
-                return
-            self.is_moving_all_points = (
-                self.line.contains(event)[0]
-                or self.ax.lines[-1].contains(event)[0]
-            )
-            self.start_drag_x = event.xdata
-            self.start_drag_y = event.ydata
+            else:
+                for i, point in enumerate(self.points):
+                    if self._check_inner_radius(
+                        point, (event.xdata, event.ydata)
+                    ):
+                        self.selected_point_index = i
+                        return
 
     def on_release(self, _: MouseEvent) -> None:
         # print("in on_release: ", type(_))
