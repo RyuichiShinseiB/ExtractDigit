@@ -35,7 +35,6 @@ class InteractivePlot:
             ]
         )
         self.line: Line2D | None = None
-        self.selected_point: tuple[float, float] | None = None
         self.selected_point_index: int | None = None
         self.is_moving_all_points = False
         self.start_drag_x: float | None = None
@@ -52,22 +51,12 @@ class InteractivePlot:
         self.ax.imshow(self.image)
         x, y = zip(*self.points)
         (self.line,) = self.ax.plot(
-            # x, y, marker="o", linestyle="-", color="r", picker=100
             x,
             y,
             "r--",
             marker="o",
-            # color="none",
-            # markeredgecolor="red",
-            # facecolor="None",
-            # picker=100,
         )
         self.ax.plot([x[0], x[-1]], [y[0], y[-1]], "r--")
-
-        # for line in self.ax.lines:
-        # line.set_pickradius()
-        # print(line.get_picker())
-        #     line.set_pickradius()
 
     def update_plot(self) -> None:
         if self.line is None:
@@ -87,7 +76,6 @@ class InteractivePlot:
         if event.button == 1:  # Left mouse button
             for i, point in enumerate(self.points):
                 if self._check_inner_radius(point, (event.xdata, event.ydata)):
-                    self.selected_point = point
                     self.selected_point_index = i
                     return
 
@@ -104,7 +92,6 @@ class InteractivePlot:
 
     def on_release(self, _: MouseEvent) -> None:
         # print("in on_release: ", type(_))
-        self.selected_point = None
         self.selected_point_index = None
         self.is_moving_all_points = False
         self.start_drag_x = None
