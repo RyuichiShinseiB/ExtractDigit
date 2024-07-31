@@ -182,6 +182,14 @@ class AddButtonFrame(ttk.Frame):
                 else start_index + i,
                 f"{prefix}: {self.src_listbox.get(idx)}",
             )
+        self.update_indices()
+
+    def update_indices(self) -> None:
+        for i in range(self.dst_listbox.size()):
+            item_text: str = self.dst_listbox.get(i)
+            new_text = f"{i+1}. {item_text.split('. ', 1)[-1]}"
+            self.dst_listbox.delete(i)
+            self.dst_listbox.insert(i, new_text)
 
 
 root = tk.Tk()
