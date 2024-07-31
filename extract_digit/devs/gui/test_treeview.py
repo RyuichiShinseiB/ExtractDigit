@@ -1,6 +1,6 @@
 import tkinter as tk
-from collections.abc import Callable, Iterable
-from tkinter import ttk
+from collections.abc import Iterable, Sequence
+from tkinter import messagebox, ttk
 from typing import Any, Literal, TypeAlias
 
 ProcessNameStrT: TypeAlias = str
@@ -15,93 +15,177 @@ PROCESSES: list[dict[TreeViewOptionStrT, Any]] = [
 ]
 
 
-class MyApp(tk.Tk):
-    def __init__(self) -> None:
-        super().__init__()
-        self.title("Screen")
-        self.selectable_process = ProcessLists(self).add_processes(PROCESSES)
-        self.selectable_process.pack(side="left")
+class MyApp(tk.Frame):
+    def __init__(self, master: tk.Tk) -> None:
+        super().__init__(master)
+        self.process_list = ProcessList(self).add_processes(PROCESSES)
 
-        self.add_btn_frame = ttk.Frame(self)
-        self.top_add_btn = ttk.Button(
-            self.add_btn_frame, text=
+        self.exce_process_list = ExecutionProcessList(self)
+
+        self.btn = AddButtonFrame(
+            self,
+            self.process_list.process_list.listbox,
+            self.exce_process_list.process_list.listbox,
         )
+        self.process_list.grid(row=0, column=0, sticky="ns")
+        self.btn.grid(row=0, column=1, sticky="ns")
+        self.exce_process_list.grid(row=0, column=2, sticky="ns")
 
-        self.selected_process = ProcessLists(self)
-        self.selected_process.pack(side="right")
 
-
-class ProcessLists(ttk.Frame):
-    def __init__(self, master_window: tk.Tk) -> None:
-        super().__init__(master_window)
-        self.listview_frame = ttk.Frame(self)
-        self.scrollbar = ttk.Scrollbar(self.listview_frame)
-        self.process_list = ttk.Treeview(
-            self.listview_frame, yscrollcommand=self.scrollbar.set, show="tree"
+class ScrollListbox(ttk.Frame):
+    def __init__(self, master: tk.Misc) -> None:
+        super().__init__(master)
+        self.scrollbar = ttk.Scrollbar(self)
+        self.listbox = tk.Listbox(
+            self,
+            yscrollcommand=self.scrollbar.set,
+            selectmode="extended",
+            exportselection=False,
         )
-        self.scrollbar.configure(command=self.process_list.yview)
+        self.scrollbar.configure(command=self.listbox.yview)
         self.scrollbar.pack(side="right", fill="y")
-        self.process_list.pack(side="left", fill="both", expand=True)
-        self.listview_frame.pack(side="top")
+        self.listbox.pack(side="left", fill="both", expand=True)
+
+
+class ProcessList(ttk.Frame):
+    def __init__(self, master: tk.Misc) -> None:
+        super().__init__(master)
+        self.process_list = ScrollListbox(self)
+        self.process_list.pack(
+            side="top",
+        )
 
         self.clear_btn = ttk.Button(
-            self, text="clear", command=self.on_clear_btn
+            self, text="selection clear", command=self.on_clear_btn
         )
         self.clear_btn.pack(side="bottom")
 
-        # self.submit_btn = ttk.Button(
-        #     self, text="submit", command=self.on_submit_btn
-        # )
-        # self.submit_btn.pack(side="right")
-
     def on_clear_btn(self) -> None:
-        selects = self.process_list.selection()
-        self.process_list.selection_remove(selects)
-
-    # def on_submit_btn(self) -> None:
-    #     selects = self.process_list.selection()
-    #     print([self.process_list.item(item) for item in selects])
+        self.process_list.listbox.select_clear(0, tk.END)
 
     def add_processes(
         self, processes: Iterable[dict[TreeViewOptionStrT, Any]]
-    ) -> "ProcessLists":
+    ) -> "ProcessList":
         try:
-            for process in processes:
-                self.process_list.insert("", "end", **process)
+            for i, process in enumerate(processes):
+                self.process_list.listbox.insert(i, process["text"])
         except TypeError as e:
             print(e)
         return self
 
-class AddButtonFrame(ttk.Frame):
-    def __init__(self, master: tk.Tk) -> None:
+
+class ExecutionProcessList(ttk.Frame):
+    def __init__(self, master: tk.Misc) -> None:
         super().__init__(master)
-        self.add_to_top_btn = ttk.Button(self, text="add to top", command=self.on_add_to_top)
-        self.add_to_above_btn = ttk.Button(self, text="add to above", command=self.on_add_to_above)
-        self.add_to_below_btn = ttk.Button(self, text="add to below", command=self.on_add_to_below)
-        self.add_to_bottom_btn = ttk.Button(self, text="add to bottom", command=self.on_add_to_bottom)
+        self.process_list = ScrollListbox(self)
+        self.process_list.listbox.config(selectmode="single")
+        self.process_list.pack(side="top")
 
-    def on_add_to(
+        self.btn_frame = ttk.Frame(self)
+        self.reset_btn = ttk.Button(
+            self.btn_frame,
+            text="reset",
+            command=self.on_reset_btn,
+        )
+        self.remove_btn = ttk.Button(
+            self.btn_frame, text="remove", command=self.on_remove_btn
+        )
+        self.reset_btn.grid(row=0, column=0)
+        self.remove_btn.grid(row=0, column=1)
+        self.btn_frame.pack(side="bottom")
+
+    def on_reset_btn(self) -> None:
+        is_reseting = messagebox.askokcancel(
+            "Warning", "Are you sure you want to delete all your settings?"
+        )
+        if is_reseting:
+            self.process_list.listbox.delete(0, tk.END)
+
+    def on_remove_btn(self) -> None:
+        selected = self.process_list.listbox.curselection()
+        for i in selected:
+            self.process_list.listbox.delete(i)
+
+    def add_processes(
+        self, processes: Iterable[dict[TreeViewOptionStrT, Any]]
+    ) -> "ExecutionProcessList":
+        try:
+            for i, process in enumerate(processes):
+                self.process_list.listbox.insert(i, process["text"])
+        except TypeError as e:
+            print(e)
+        return self
+
+
+class AddButtonFrame(ttk.Frame):
+    def __init__(
+        self, master: tk.Misc, src_listbox: tk.Listbox, dst_listbox: tk.Listbox
+    ) -> None:
+        super().__init__(master)
+        self.src_listbox = src_listbox
+        self.dst_listbox = dst_listbox
+        self.add_to_top_btn = ttk.Button(
+            self, text="add to top", command=self.on_add_to_top
+        )
+        self.add_to_above_btn = ttk.Button(
+            self, text="add to above", command=self.on_add_to_above_btn
+        )
+        self.add_to_below_btn = ttk.Button(
+            self, text="add to below", command=self.on_add_to_below_btn
+        )
+        self.add_to_bottom_btn = ttk.Button(
+            self, text="add to bottom", command=self.on_add_to_bottom_btn
+        )
+
+        self.add_to_top_btn.pack()
+        self.add_to_above_btn.pack()
+        self.add_to_below_btn.pack()
+        self.add_to_bottom_btn.pack()
+
+    def on_add_to_top(self) -> None:
+        src_list_idxs: tuple[int] = self.src_listbox.curselection()
+        self.add_dst_listbox(src_list_idxs, 0, "top")
+
+    def on_add_to_above_btn(self) -> None:
+        src_list_idxs: tuple[int] = self.src_listbox.curselection()
+        try:
+            dst_list_idx: int = self.dst_listbox.curselection()[0]
+        except IndexError:
+            dst_list_idx = 0
+        self.add_dst_listbox(src_list_idxs, dst_list_idx, "above")
+
+    def on_add_to_below_btn(self) -> None:
+        src_list_idxs: tuple[int] = self.src_listbox.curselection()
+        try:
+            dst_list_id: int | str = self.dst_listbox.curselection()[-1] + 1
+        except IndexError:
+            dst_list_id = tk.END
+        self.add_dst_listbox(src_list_idxs, dst_list_id, "below")
+
+    def on_add_to_bottom_btn(self) -> None:
+        src_list_idxs: tuple[int] = self.src_listbox.curselection()
+        self.add_dst_listbox(src_list_idxs, tk.END, "bottom")
+
+    def add_dst_listbox(
         self,
-        place: Literal["top", "above", "below", "bottom"],
-        src_list: ttk.Treeview,
-        dst_list: ttk.Treeview
-    ) -> Callable:
-        src_processes_ids = src_list.selection()
-        dst_process_id = dst_list.()
-        src_processes = [src_list.item(src_id) for src_id in src_processes_ids]
-        dst_list.insert("", )
-        pass
+        idxs: Sequence[int],
+        start_index: str | int,
+        prefix: str | None = None,
+    ) -> None:
+        if len(idxs) == 0:
+            return
+        prefix = "none" if prefix is None else prefix
+        for i, idx in enumerate(idxs):
+            self.dst_listbox.insert(
+                start_index
+                if isinstance(start_index, str)
+                else start_index + i,
+                f"{prefix}: {self.src_listbox.get(idx)}",
+            )
 
-# root = MyApp()
-# scrollbar = ttk.Scrollbar(root)
-# listbox = ttk.Treeview(root, yscrollcommand=scrollbar.set, show="tree")
-# scrollbar.configure(command=listbox.yview)
 
-# scrollbar.pack(side="right", fill="y")
-# listbox.pack(side="left", fill="both", expand=True)
+root = tk.Tk()
+myapp = MyApp(root)
+myapp.pack()
 
-# for i in range(100):
-#     text = f"Item #{i+1}"
-#     listbox.insert("", "end", text=text)
-
-# root.mainloop()
+root.mainloop()
